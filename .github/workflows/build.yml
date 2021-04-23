@@ -8,8 +8,6 @@ jobs:
   cdk8s-k3d:
     name:  CDK8s with k3d
     runs-on: ubuntu-latest
-    container:
-      image: jsii/superchain
 
     defaults:
       run:
@@ -18,6 +16,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v1          
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
       
       - uses: AbsaOSS/k3d-action@v1.3.1
         name: "Create k3d Cluster"
@@ -36,8 +42,8 @@ jobs:
 
       - name: Install python dependencies
         run: |
-          pip3 install pipenv
-          if [ -f requirements.txt ]; then pip3 install -r requirements.txt; fi
+          pip install pipenv
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pipenv install
       
       - name: Install CDK8s-cli

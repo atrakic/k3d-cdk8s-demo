@@ -20,6 +20,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.8
+
       - uses: AbsaOSS/k3d-action@v1.3.1
         id: k3d-cluster-1
         with:
@@ -33,6 +34,14 @@ jobs:
           echo k3d-cluster-1: ${{ steps.k3d-cluster-1.outputs.network }} ${{ steps.k3d-cluster-1.outputs.subnet-CIDR }}
           echo
           kubectl cluster-info
+
+      - name: Nodes
+        run: |
+          docker ps -a
+          kubectl get nodes -o wide
+
+      - name: Network
+        run: docker network inspect k3d-action-bridge-network
 
       - name: Install CDK8s-cli
         run: npm install -g cdk8s-cli

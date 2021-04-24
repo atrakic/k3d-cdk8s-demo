@@ -1,0 +1,60 @@
+name: 'cdk8s-k3d'
+# Build and deploy on k3d with cdk8s.io by using python script
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  cdk8s-k3d:
+    name:  CDK8s with k3d
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - uses: AbsaOSS/k3d-action@v1.3.1
+        id: k3d-cluster-1
+        with:
+          args: >-
+            --agents 1
+            --config=k3d.yaml
+      
+      - name: Cluster info
+        run: |
+          echo k3d-cluster-1: ${{ steps.k3d-cluster-1.outputs.network }} ${{ steps.k3d-cluster-1.outputs.subnet-CIDR }}
+          echo
+          kubectl cluster-info
+      
+      - name: Install CDK8s-cli
+        run: npm install -g cdk8s-cli
+
+      - name: Install python dependencies
+        run: |
+          pip3 install --user pipenv
+          PYTHON_BIN_PATH="$(python3 -m site --user-base)/bin"
+          export PATH="$PATH:$PYTHON_BIN_PATH"
+      
+      - name: CDK8s import
+        run: |
+          pipenv install
+          cdk8s import --language python
+
+      - name: CDK8s synthesize into a k8s template
+        run: |
+          cdk8s synth
+      
+      - name: Apply the k8s template
+        run: |
+          kubectl apply -f ./dist/hello.k8s.yaml
+
+      - name: Get svc and pods
+        run: |
+          kubectl get services,pods -o wide

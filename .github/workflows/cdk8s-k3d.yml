@@ -69,7 +69,3 @@ jobs:
       - name: Get svc and pods
         run: |
           kubectl get services,pods -o wide
-
-      - name: Use cURL to test deployment
-        run: |
-          ./test/test.sh

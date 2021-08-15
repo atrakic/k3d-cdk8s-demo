@@ -1,11 +1,11 @@
 MAKEFLAGS += --silent
 
-.PHONY: up import synth deploy status test clean
+.PHONY: setup import synth deploy status test clean
 
-all: up import synth deploy status test
+all: setup import synth deploy status test
 	echo "Doing all"
 
-up:
+setup:
 	which cdk8s || npm install -g cdk8s-cli
 	k3d cluster ls k3s-default || k3d cluster create --config k3d.yaml
 	kubectl cluster-info

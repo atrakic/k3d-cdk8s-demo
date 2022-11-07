@@ -25,12 +25,12 @@ jobs:
 
       - name: Install python dependencies
         run: |
-          curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
-          #pip3 install --user pipenv
+          #curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+          pip3 install pipenv
           pip3 install flake8 pytest
           if [ -f requirements.txt ]; then pip3 install -r requirements.txt; fi
           PYTHON_BIN_PATH="$(python3 -m site --user-base)/bin"
-          export PATH="$PATH:$PYTHON_BIN_PATH"
+          export PATH="$PYTHON_BIN_PATH:$PATH"
 
       - name: Lint with flake8
         run: |

@@ -3,11 +3,13 @@ name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
 
-[dev-packages]
+[requires]
+python_version = "3"
 
 [packages]
-constructs = "==10.1.12"
-cdk8s = "~=2.2.87"
+constructs = "~=10.1.152"
+cdk8s = "~=2.5.37"
+cdk8s-plus-25 = "~=2.0.19"
 
-[requires]
-python_version = "3.7"
+[pipenv]
+allow_prereleases = true

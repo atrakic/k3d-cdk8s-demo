@@ -15,7 +15,7 @@ jobs:
         shell: bash
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v1
       - uses: actions/setup-python@v2
         with:
@@ -34,12 +34,12 @@ jobs:
           # stop the build if there are Python syntax errors or undefined names
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          #flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
       - uses: AbsaOSS/k3d-action@v2.3.0
         id: k3d-cluster
         with:
-          cluster-name: "test"
+          cluster-name: "ci"
           args: >-
             --agents 1
             --config=k3d.yaml

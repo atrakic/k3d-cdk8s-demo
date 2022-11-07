@@ -46,6 +46,8 @@ jobs:
         run: |
           pipenv install
           cdk8s import --language python
+          # Needs to be executable before synth !!
+          chmod +x main.py
 
       - name: CDK8s synthesize into a k8s template
         run: |

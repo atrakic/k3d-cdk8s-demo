@@ -65,9 +65,10 @@ jobs:
           echo
           kubectl config use-context k3d-ci
           kubectl cluster-info
+
       - name: Apply generated k8s template
         run: |
-          kubectl apply -f ./dist/hello.k8s.yaml
+          kubectl apply -f ./dist/hello-python.k8s.yaml
 
       - name: Get svc and pods
         run: |

@@ -1,7 +1,8 @@
-name: 'cdk8s-k3d'
 # Build and deploy on k3d with cdk8s.io by using python script
+name: 'cdk8s-k3d'
 
 on:
+  workflow_dispatch:
   pull_request:
   push:
 
@@ -9,46 +10,33 @@ jobs:
   cdk8s-k3d:
     name: CDK8s with k3d
     runs-on: ubuntu-latest
-
     defaults:
       run:
         shell: bash
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3.1.0
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
+          cache: 'pipenv'
 
       - name: Install python dependencies
         run: |
-          pip3 install --user pipenv
+          #curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+          pip3 install pipenv
           pip3 install flake8 pytest
           if [ -f requirements.txt ]; then pip3 install -r requirements.txt; fi
           PYTHON_BIN_PATH="$(python3 -m site --user-base)/bin"
-          export PATH="$PATH:$PYTHON_BIN_PATH"
+          export PATH="$PYTHON_BIN_PATH:$PATH"
 
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-
-      - uses: AbsaOSS/k3d-action@v2.3.0
-        id: k3d-cluster
-        with:
-          cluster-name: "test"
-          args: >-
-            --agents 1
-            --config=k3d.yaml
-
-      - name: Cluster info
-        run: |
-          echo k3d-cluster: ${{ steps.k3d-cluster.outputs.network }} ${{ steps.k3d-cluster.outputs.subnet-CIDR }}
-          echo
-          kubectl cluster-info
+          #flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
       - name: Install CDK8s-cli
         run: npm install -g cdk8s-cli
@@ -57,14 +45,31 @@ jobs:
         run: |
           pipenv install
           cdk8s import --language python
+          # Needs to be executable before synth !!
+          chmod +x main.py
 
       - name: CDK8s synthesize into a k8s template
         run: |
           cdk8s synth
 
+      - uses: AbsaOSS/k3d-action@v2.3.0
+        id: k3d-cluster
+        with:
+          cluster-name: "ci"
+          args: >-
+            --agents 1
+            --config=k3d.yaml
+
+      - name: Cluster info
+        run: |
+          echo k3d-cluster: ${{ steps.k3d-cluster.outputs.network }} ${{ steps.k3d-cluster.outputs.subnet-CIDR }}
+          kubectl config use-context k3d-ci
+          kubectl cluster-info
+
       - name: Apply generated k8s template
         run: |
-          kubectl apply -f ./dist/hello.k8s.yaml
+          kubectl apply -f ./dist/hello-python.k8s.yaml
+          kubectl wait --for=condition=Ready pods --timeout=300s -l "app=hello-k8s"
 
       - name: Get svc and pods
         run: |

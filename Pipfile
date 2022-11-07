@@ -4,12 +4,12 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [requires]
-python_version = "3.8"
+python_version = "3"
 
 [packages]
-constructs = "~=3.3.71"
-cdk8s = "~=1.0.0.b11"
-cdk8s-plus-17 = "~=1.0.0.b11"
+constructs = "~=10.1.152"
+cdk8s = "~=2.5.37"
+cdk8s-plus-25 = "~=2.0.19"
 
 [pipenv]
 allow_prereleases = true

@@ -1,23 +1,31 @@
-apiVersion: k3d.io/v1alpha2
+## https://k3d.io/v5.4.1/usage/configfile/
+apiVersion: k3d.io/v1alpha4
 kind: Simple
-image: rancher/k3s:latest
+#image: docker.io/rancher/k3s:v1.21.2-k3s1
+image: docker.io/rancher/k3s:v1.22.2-k3s1
 servers: 1
-agents: 1
+agents: 3 # # The action will overwrite this by 1
+network: nw01
 ports:
-  - port: 80:80
+  - port: 0.0.0.0:80:80
     nodeFilters:
-      - loadbalancer
-  - port: 443:443
+      - agent:0:direct
+  - port: 0.0.0.0:443:443
     nodeFilters:
-      - loadbalancer
+      - agent:0:direct
+  - port: 0.0.0.0:5053:53/udp
+    nodeFilters:
+      - agent:0:direct
 options:
   k3d:
     wait: true
-    timeout: "60s"
+    timeout: 1m0s
+    disableLoadbalancer: true
   k3s:
-    extraServerArgs:
-      - --no-deploy=metrics-server
-    extraAgentArgs: []
+    extraArgs:
+      - arg: --no-deploy=traefik,servicelb,metrics-server
+        nodeFilters:
+          - server:*
   kubeconfig:
     updateDefaultKubeconfig: true
     switchCurrentContext: true

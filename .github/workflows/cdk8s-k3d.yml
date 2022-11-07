@@ -10,7 +10,6 @@ jobs:
   cdk8s-k3d:
     name: CDK8s with k3d
     runs-on: ubuntu-latest
-
     defaults:
       run:
         shell: bash
@@ -64,13 +63,13 @@ jobs:
       - name: Cluster info
         run: |
           echo k3d-cluster: ${{ steps.k3d-cluster.outputs.network }} ${{ steps.k3d-cluster.outputs.subnet-CIDR }}
-          echo
           kubectl config use-context k3d-ci
           kubectl cluster-info
 
       - name: Apply generated k8s template
         run: |
           kubectl apply -f ./dist/hello-python.k8s.yaml
+          kubectl wait --for=condition=Ready pods --timeout=300s -l "app=hello-k8s"
 
       - name: Get svc and pods
         run: |

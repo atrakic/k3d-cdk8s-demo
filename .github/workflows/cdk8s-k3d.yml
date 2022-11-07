@@ -1,7 +1,8 @@
-name: 'cdk8s-k3d'
 # Build and deploy on k3d with cdk8s.io by using python script
+name: 'cdk8s-k3d'
 
 on:
+  workflow_dispatch:
   pull_request:
   push:
 
@@ -48,6 +49,7 @@ jobs:
         run: |
           echo k3d-cluster: ${{ steps.k3d-cluster.outputs.network }} ${{ steps.k3d-cluster.outputs.subnet-CIDR }}
           echo
+          kubectl config use-context k3d-ci
           kubectl cluster-info
 
       - name: Install CDK8s-cli

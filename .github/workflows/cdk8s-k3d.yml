@@ -21,10 +21,12 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: 3.8
+          cache: 'pipenv'
 
       - name: Install python dependencies
         run: |
-          pip3 install --user pipenv
+          curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+          #pip3 install --user pipenv
           pip3 install flake8 pytest
           if [ -f requirements.txt ]; then pip3 install -r requirements.txt; fi
           PYTHON_BIN_PATH="$(python3 -m site --user-base)/bin"
@@ -36,6 +38,18 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           #flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Install CDK8s-cli
+        run: npm install -g cdk8s-cli
+
+      - name: CDK8s import
+        run: |
+          pipenv install
+          cdk8s import --language python
+
+      - name: CDK8s synthesize into a k8s template
+        run: |
+          cdk8s synth
 
       - uses: AbsaOSS/k3d-action@v2.3.0
         id: k3d-cluster
@@ -51,19 +65,6 @@ jobs:
           echo
           kubectl config use-context k3d-ci
           kubectl cluster-info
-
-      - name: Install CDK8s-cli
-        run: npm install -g cdk8s-cli
-
-      - name: CDK8s import
-        run: |
-          pipenv install
-          cdk8s import --language python
-
-      - name: CDK8s synthesize into a k8s template
-        run: |
-          cdk8s synth
-
       - name: Apply generated k8s template
         run: |
           kubectl apply -f ./dist/hello.k8s.yaml

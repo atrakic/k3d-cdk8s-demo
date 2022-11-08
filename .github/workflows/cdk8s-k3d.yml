@@ -51,6 +51,12 @@ jobs:
       - name: CDK8s synthesize into a k8s template
         run: |
           cdk8s synth
+          
+      - name: Upload manifest result
+        uses: actions/upload-artifact@v3
+        with:
+          name: k8s-manifest
+          path: ./dist/hello-python.k8s.yaml
 
       - uses: AbsaOSS/k3d-action@v2.3.0
         id: k3d-cluster

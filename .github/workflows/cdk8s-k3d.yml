@@ -58,7 +58,7 @@ jobs:
           name: k8s-manifest
           path: ./dist/hello-python.k8s.yaml
 
-      - uses: AbsaOSS/k3d-action@v2.3.0
+      - uses: AbsaOSS/k3d-action@v2.4.0
         id: k3d-cluster
         with:
           cluster-name: "ci"
